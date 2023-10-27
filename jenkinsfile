@@ -1,0 +1,71 @@
+pipeline{
+    agent any
+    tools {
+        maven 'mymaven'
+            }
+    stages{
+        stage('Git Clone'){
+            steps{
+               git branch: 'main', url: 'https://github.com/spy1811/fullautomation.git'
+            }
+        }      
+        stage("Build"){            
+            steps{
+                  sh "mvn clean install -DskipTests"        
+                   }                     
+                  }
+        stage('Docker Build'){
+            steps{
+                sh 'docker build -t shubhamtech/raju .'
+            }
+        }
+        stage('Docker Push'){
+            steps{
+                withCredentials([string(credentialsId: 'dockerhublogin', variable: 'dockerpush')]) {
+                sh 'docker login -u shubhamtech -p ${dockerpush}'
+                }
+                 sh 'docker push shubhamtech/raju'
+            }
+       }
+     }
+        stage('Deploy app to Kubernetes'){
+        steps{
+            script{
+           kubernetesDeploy(configs: "mysql-pv.yml", kubeconfigId: "kubernetes")
+            }
+        }
+
+        }
+       stage('Deploy app to Kubernetes'){
+        steps{
+            script{
+           kubernetesDeploy(configs: "mysql-secrets.yml", kubeconfigId: "kubernetes")
+            }
+        }
+
+        }
+         stage('Deploy app to Kubernetes'){
+        steps{
+            script{
+           kubernetesDeploy(configs: "mysql-configMap.yml", kubeconfigId: "kubernetes")
+            }
+        }
+
+        }
+         stage('Deploy app to Kubernetes'){
+        steps{
+            script{
+           kubernetesDeploy(configs: "db-deployment.yml", kubeconfigId: "kubernetes")
+            }
+        }
+
+        }
+         stage('Deploy app to Kubernetes'){
+        steps{
+            script{
+           kubernetesDeploy(configs: "app-deployment.yml", kubeconfigId: "kubernetes")
+            }
+        }
+
+        }
+}
