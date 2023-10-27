@@ -8,6 +8,13 @@ spec:
   selector:
     app: mysql
   clusterIP: None
+
+spec: 
+  type: Nodeport
+  ports: 
+  - port: 8080
+    nodePort: 30001
+    protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -48,3 +55,6 @@ spec:
       volumes:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
+
+    
+      
